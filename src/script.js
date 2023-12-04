@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import GUI from 'lil-gui'
 
@@ -24,10 +24,16 @@ const fbxLoader = new FBXLoader()
 */
 // Canvas
 const webglCanvas = document.getElementById('webgl')
-const htmlDiv = document.querySelector('.content')
+const htmlDiv = document.querySelector('#html')
 
 // Scene
 const scene = new THREE.Scene()
+
+// Div positioning
+const divPosition = {
+  position: new THREE.Vector3(0, 1.14, -.65),
+  element: htmlDiv
+}
 
 /**
  * Objects
@@ -158,7 +164,7 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 0.1, 30)
-camera.position.set(1, .8, 0)
+camera.position.set(1, 0, 2)
 
 gui.add(camera.position, 'z').min(-5).max(20).step(.01).name('Camera Z')
 gui.add(camera.position, 'y').min(-5).max(20).step(.01).name('Camera Y')
@@ -179,7 +185,7 @@ window.addEventListener('touchmove', (event) => {
 }, { passive: true })
 
 // Controls
-// const controls = new OrbitControls(camera, canvas)
+// const controls = new OrbitControls(camera, webglCanvas)
 // controls.enableDamping = true
 
 /**
@@ -216,29 +222,35 @@ function tick() {
   // Update controls
   // controls.update()
 
+  // Update html div position
+  const screenPosition = divPosition.position.clone()
+  screenPosition.project(camera)
+  console.log(screenPosition.z)
+
+  const translateX = screenPosition.x * sizes.width * 0.5
+  const translateY = - screenPosition.y * sizes.height * 0.5
+  const translateZ = screenPosition.z * sizes.height * 0.001
+  divPosition.element.style.transform = `
+    translate(-50%, -50%)
+    translateX(${translateX}px)
+    translateY(${translateY}px)
+    scale(${translateZ * .15})
+  `
+
   // Update camera
-  camera.position.x = (cursor.x * .1) + 2
+  camera.position.x = (cursor.x * .1)
   camera.position.y = (cursor.y * .1) + 1.2
   // camera.position.z = Math.sin(elapsedTime) + 1.3
   camera.lookAt(lookAt.x, lookAt.y, lookAt.z)
 
+
   // calculate the matrix projection and view matrix
-  const viewMatrix = camera.matrixWorldInverse
-  viewMatrix.elements[8] *= -1 // invert the third column of the view matrix (for z axis)
-  viewMatrix.elements[1] *= -1 // invert the second column of the view matrix (for y axis)
+  // const viewMatrix = camera.matrixWorldInverse
+  // viewMatrix.elements[8] *= -1 // invert the third column of the view matrix (for z axis)
+  // viewMatrix.elements[1] *= -1 // invert the second column of the view matrix (for y axis)
 
-  // camera.position.z = Math.sin(elapsedTime) + 1
-  console.log(camera.position.z)
+  // htmlDiv.style.transform += ` matrix3d(${viewMatrix.elements.join(',')})`
 
-  // set the matrix on the html div
-  htmlDiv.style.transform = `matrix3d(${viewMatrix.elements.join(',')})`
-  htmlDiv.style.transform += ` translateY(${cursor.y * 2}px)`
-  htmlDiv.style.transform += ` translateX(${-cursor.x * 2}px)`
-
-  const distance = camera.position.z;
-  const scale = 10 / (Math.tan((camera.fov / 2) * Math.PI / 180) * (distance * 2));
-
-  htmlDiv.style.transform += ` scaleX(${scale * .1}) scaleY(${scale * .1})`;
   // Render
   renderer.render(scene, camera)
 
