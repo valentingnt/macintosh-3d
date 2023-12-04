@@ -1,7 +1,7 @@
 import * as THREE from '../node_modules/three/build/three.module.js'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
-import GUI from 'lil-gui'
+import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js'
+import { FBXLoader } from '../node_modules/three/examples/jsm/loaders/FBXLoader'
+import GUI from '../node_modules/lil-gui'
 
 /**
  * THREE.JS
